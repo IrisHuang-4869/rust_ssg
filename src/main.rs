@@ -20,6 +20,11 @@ fn main() {
     println!("Templates file is created");
 
     // create the public directory
+    if let Err(err) = fs::remove_dir_all(PUBLIC_DIR) {
+        if err.kind() != std::io::ErrorKind::NotFound {
+            panic!("Failed to clear public directory: {}", err);
+        }
+    }
     fs::create_dir_all(PUBLIC_DIR).expect("Failed to create public directory");
     println!("Puclic file is created");
     
@@ -66,11 +71,13 @@ fn main() {
                 .render(PAGE_TEMPLATE, &context)
                 .expect("Failed to render the HTML");
 
-            // write the html to the public directory
-            fs::write(format!("{}/{}.html", PUBLIC_DIR, file_stem), &rendered)
-                .expect("Failed to write html file");
+            // write to public/<post>/index.html
+            let post_output_dir = format!("{}/{}", PUBLIC_DIR, file_stem);
+            fs::create_dir_all(&post_output_dir).expect("Failed to create post output directory");
+            let output_path = format!("{}/index.html", post_output_dir);
+            fs::write(&output_path, &rendered).expect("Failed to write html file");
 
-            println!("🚀 Generated {}/{}.html", PUBLIC_DIR, file_stem);
+            println!("🚀 Generated {}", output_path);
         }
 
     }

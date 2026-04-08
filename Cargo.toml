@@ -1,0 +1,8 @@
+[package]
+name = "rust_ssg"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+pulldown-cmark = "0.13.3"
+tera = "1.20.1"

@@ -7,6 +7,8 @@ const PUBLIC_DIR: &str = "public";
 const STATIC_DIR: &str = "static";
 const TEMPLATES_DIR: &str = "templates";
 const PAGE_TEMPLATE: &str = "page.html";
+const THEMES_DIR: &str = "themes";
+const DEFAULT_THEME: &str = "style";
 
 fn main() {
 
@@ -22,11 +24,21 @@ fn main() {
     println!("Puclic file is created");
     
     // copy the style.css to the public directory
-    fs::copy(
-        format!("{}/style.css", STATIC_DIR),
-        format!("{}/style.css", PUBLIC_DIR),
-    )
-    .expect("Failed to copy style.css");
+    let selected_theme = read_theme_from_args();
+    let source_css = theme_source_path(&selected_theme);
+    let target_css = format!("{}/style.css", PUBLIC_DIR);
+
+    if fs::metadata(&source_css).is_err() {
+        eprintln!(
+            "Theme '{}' not found at '{}'. Fallback to '{}'.",
+            selected_theme, source_css, DEFAULT_THEME
+        );
+        let fallback = theme_source_path(DEFAULT_THEME);
+        fs::copy(fallback, &target_css).expect("Failed to copy fallback theme css");
+    } else {
+        println!("Using theme: {}", selected_theme);
+        fs::copy(&source_css, &target_css).expect("Failed to copy theme css");
+    }
 
     let entries = fs::read_dir(CONTENT_DIR).expect("Please create the content directory and put .md files in it");
     for entry in entries {
@@ -62,4 +74,21 @@ fn main() {
         }
 
     }
+}
+
+
+fn read_theme_from_args() -> String {
+    let mut args = std::env::args().skip(1);
+    while let Some(arg) = args.next() {
+        if arg == "--theme" {
+            if let Some(theme) = args.next() {
+                return theme;
+            }
+        }
+    }
+    DEFAULT_THEME.to_string()
+}
+
+fn theme_source_path(theme: &str) -> String {
+    format!("{}/{}/{}.css", STATIC_DIR, THEMES_DIR, theme)
 }

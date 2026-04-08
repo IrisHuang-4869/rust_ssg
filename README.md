@@ -10,7 +10,8 @@ This project currently focuses on two core features:
 
 - Convert `content/*.md` to `public/*.html`
 - Render each page using `templates/page.html` (Tera template)
-- Apply styles from `static/style.css` (copied to `public/style.css`)
+- Apply styles from `static/themes/<theme>.css` (copied to `public/style.css`)
+- Support theme selection via CLI: `--theme <name>`
 - Use the markdown filename as page title (e.g. `test.md` -> `test.html`)
 
 ## Requirements
@@ -25,6 +26,29 @@ cd rust_ssg
 cargo run
 ```
 
+## Theme Selection
+
+Default theme:
+
+```bash
+cargo run
+```
+
+Specify a theme:
+
+```bash
+cargo run -- --theme style
+cargo run -- --theme your-theme
+```
+
+Theme files should be placed in:
+
+```text
+static/themes/<name>.css
+```
+
+If the selected theme does not exist, the generator falls back to `style`.
+
 ## Project Structure
 
 ```text
@@ -33,7 +57,8 @@ rust_ssg/
 ├── templates/
 │   └── page.html       # HTML template (Tera)
 ├── static/
-│   └── style.css       # Global styles
+│   └── themes/
+│       └── style.css
 ├── public/             # Generated output
 ├── src/
 │   └── main.rs         # Build pipeline

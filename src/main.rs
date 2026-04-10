@@ -71,10 +71,15 @@ fn main() {
                 .render(PAGE_TEMPLATE, &context)
                 .expect("Failed to render the HTML");
 
-            // write to public/<post>/index.html
-            let post_output_dir = format!("{}/{}", PUBLIC_DIR, file_stem);
-            fs::create_dir_all(&post_output_dir).expect("Failed to create post output directory");
-            let output_path = format!("{}/index.html", post_output_dir);
+            // if source is index.md, write to public/index.html
+            // otherwise write to public/<post>/index.html
+            let output_path = if file_stem == "index" {
+                format!("{}/index.html", PUBLIC_DIR)
+            } else {
+                let post_output_dir = format!("{}/{}", PUBLIC_DIR, file_stem);
+                fs::create_dir_all(&post_output_dir).expect("Failed to create post output directory");
+                format!("{}/index.html", post_output_dir)
+            };
             fs::write(&output_path, &rendered).expect("Failed to write html file");
 
             println!("🚀 Generated {}", output_path);
